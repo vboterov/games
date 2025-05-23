@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Juego de Números">
+    <title>Juego de Secuencia Numérica</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            color: white;
+        }
+
+        .game-container {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 24px;
+            font-weight: 300;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .instructions {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .game-info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .attempts {
+            color: #FFE66D;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .score {
+            color: #4ECDC4;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .input-section {
+            margin-bottom: 20px;
+        }
+
+        .number-input {
+            width: 100%;
+            padding: 15px;
+            font-size: 20px;
+            border: none;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.9);
+            text-align: center;
+            letter-spacing: 8px;
+            font-weight: bold;
+        }
+
+        .number-input:focus {
+            outline: none;
+            background: white;
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+        }
+
+        .buttons {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        button {
+            flex: 1;
+            padding: 15px;
+            font-size: 16px;
+            font-weight: bold;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, #FF6B6B, #FF8E53);
+            color: white;
+            box-shadow: 0 4px 15px rgba(255, 107, 107, 0.4);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 107, 107, 0.6);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 2px solid rgba(255, 255, 255, 0.4);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .btn-primary:disabled {
+            background: rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.4);
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .history {
+            max-height: 300px;
+            overflow-y: auto;
+            margin-bottom: 20px;
+        }
+
+        .attempt-item {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            animation: slideIn 0.5s ease-out;
+        }
+
+        .attempt-number {
+            font-size: 24px;
+            font-weight: bold;
+            letter-spacing: 6px;
+            text-align: center;
+            margin-bottom: 8px;
+            color: #FFE66D;
+        }
+
+        .attempt-feedback {
+            text-align: center;
+            font-size: 14px;
+            color: #E8F5E8;
+        }
+
+        .correct {
+            color: #4CAF50;
+            font-weight: bold;
+        }
+
+        .position {
+            color: #FF9800;
+            font-weight: bold;
+        }
+
+        .message {
+            text-align: center;
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .message.success {
+            background: rgba(76, 175, 80, 0.3);
+            border: 2px solid #4CAF50;
+            color: #E8F5E8;
+        }
+
+        .message.error {
+            background: rgba(244, 67, 54, 0.3);
+            border: 2px solid #F44336;
+            color: #FFEBEE;
+        }
+
+        .message.info {
+            background: rgba(33, 150, 243, 0.3);
+            border: 2px solid #2196F3;
+            color: #E3F2FD;
+        }
+
+        @media (max-width: 480px) {
+            .game-container {
+                padding: 20px;
+                margin: 10px;
+            }
+
+            h1 {
+                font-size: 20px;
+            }
+
+            .number-input {
+                font-size: 18px;
+                letter-spacing: 6px;
+            }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .win-animation {
+            animation: celebrate 0.6s ease-in-out;
+        }
+
+        @keyframes celebrate {
+
+            0%,
+            100% {
+                transform: scale(1);
+            }
+
+            25% {
+                transform: scale(1.1) rotate(-5deg);
+            }
+
+            75% {
+                transform: scale(1.1) rotate(5deg);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="game-container">
+        <h1>🔢 Adivina la Secuencia</h1>
+
+        <div class="instructions">
+            Adivina la secuencia de 5 números (0-9).<br>
+            Recibirás pistas en cada intento.
+        </div>
+
+        <div class="game-info">
+            <div class="attempts">Intentos: <span id="attemptsLeft">5</span>/5</div>
+            <div class="score">Puntos: <span id="score">0</span></div>
+        </div>
+
+        <div class="input-section">
+            <input type="text" class="number-input" id="guessInput" placeholder="-----" maxlength="5" disabled>
+        </div>
+
+        <div class="buttons">
+            <button class="btn-primary" id="submitBtn" onclick="submitGuess()" disabled>Intentar</button>
+            <button class="btn-secondary" id="newGameBtn" onclick="startNewGame()">Nuevo Juego</button>
+        </div>
+
+        <div id="message" class="message" style="display: none;"></div>
+
+        <div class="history" id="history"></div>
+    </div>
+
+    <script>
+        let secretSequence = [];
+        let attemptsLeft = 5;
+        let score = 0;
+        let gameActive = false;
+        let attemptHistory = [];
+
+        function generateSequence() {
+            secretSequence = [];
+            for (let i = 0; i < 5; i++) {
+                secretSequence.push(Math.floor(Math.random() * 10));
+            }
+            console.log('Secuencia secreta:', secretSequence.join('')); // Para debugging
+        }
+
+        function startNewGame() {
+            attemptsLeft = 5;
+            gameActive = true;
+            score = 0;
+            attemptHistory = [];
+            generateSequence();
+            updateDisplay();
+            clearHistory();
+            showMessage('¡Nuevo juego iniciado! Adivina la secuencia de 5 números.', 'info');
+            enableInput();
+            document.getElementById('guessInput').value = '';
+            document.getElementById('guessInput').focus();
+        }
+
+        function enableInput() {
+            document.getElementById('guessInput').disabled = false;
+            document.getElementById('submitBtn').disabled = false;
+        }
+
+        function disableInput() {
+            document.getElementById('guessInput').disabled = true;
+            document.getElementById('submitBtn').disabled = true;
+        }
+
+        function submitGuess() {
+            if (!gameActive) return;
+
+            const guess = document.getElementById('guessInput').value.replace(/\s/g, '');
+
+            if (guess.length !== 5 || !/^\d+$/.test(guess)) {
+                showMessage('¡Por favor ingresa exactamente 5 dígitos!', 'error');
+                return;
+            }
+
+            const guessArray = guess.split('').map(num => parseInt(num));
+            const feedback = checkGuess(guessArray);
+
+            attemptHistory.push({
+                guess: guess,
+                feedback: feedback
+            });
+
+            addToHistory(guess, feedback);
+
+            if (feedback.correct === 5) {
+                // ¡Ganó!
+                score += attemptsLeft * 20;
+                showMessage('🎉 ¡Excelente! ¡Adivinaste la secuencia!', 'success');
+                gameActive = false;
+                disableInput();
+                document.querySelector('.game-container').classList.add('win-animation');
+                setTimeout(() => {
+                    document.querySelector('.game-container').classList.remove('win-animation');
+                }, 600);
+            } else {
+                attemptsLeft--;
+                if (attemptsLeft > 0) {
+                    showMessage(`Intento ${6 - attemptsLeft}. Te quedan ${attemptsLeft} intentos.`, 'info');
+                    document.getElementById('guessInput').value = '';
+                } else {
+                    showMessage(`¡Se acabaron los intentos! La secuencia era: ${secretSequence.join('')}`, 'error');
+                    gameActive = false;
+                    disableInput();
+                }
+            }
+
+            updateDisplay();
+        }
+
+        function checkGuess(guessArray) {
+            let correct = 0; // Números correctos en posición correcta
+            let wrongPosition = 0; // Números correctos pero en posición incorrecta
+
+            let secretCopy = [...secretSequence];
+            let guessCopy = [...guessArray];
+
+            // Primero contar los correctos (posición exacta)
+            for (let i = 0; i < 5; i++) {
+                if (guessArray[i] === secretSequence[i]) {
+                    correct++;
+                    secretCopy[i] = -1; // Marcar como usado
+                    guessCopy[i] = -1; // Marcar como usado
+                }
+            }
+
+            // Luego contar los que están en posición incorrecta
+            for (let i = 0; i < 5; i++) {
+                if (guessCopy[i] !== -1) { // Si no fue marcado como correcto
+                    let foundIndex = secretCopy.indexOf(guessCopy[i]);
+                    if (foundIndex !== -1) {
+                        wrongPosition++;
+                        secretCopy[foundIndex] = -1; // Marcar como usado
+                    }
+                }
+            }
+
+            return { correct, wrongPosition };
+        }
+
+        function addToHistory(guess, feedback) {
+            const historyDiv = document.getElementById('history');
+            const attemptDiv = document.createElement('div');
+            attemptDiv.className = 'attempt-item';
+
+            let feedbackText = '';
+            if (feedback.correct === 5) {
+                feedbackText = '🎉 ¡Perfecto! ¡Todos correctos!';
+            } else if (feedback.correct === 0 && feedback.wrongPosition === 0) {
+                feedbackText = '❌ Ningún número es correcto';
+            } else {
+                let parts = [];
+                if (feedback.correct > 0) {
+                    parts.push(`<span class="correct">${feedback.correct} correctos</span>`);
+                }
+                if (feedback.wrongPosition > 0) {
+                    parts.push(`<span class="position">${feedback.wrongPosition} mal ubicados</span>`);
+                }
+                feedbackText = parts.join(' • ');
+            }
+
+            attemptDiv.innerHTML = `
+                <div class="attempt-number">${guess.split('').join(' ')}</div>
+                <div class="attempt-feedback">${feedbackText}</div>
+            `;
+
+            historyDiv.insertBefore(attemptDiv, historyDiv.firstChild);
+        }
+
+        function clearHistory() {
+            document.getElementById('history').innerHTML = '';
+        }
+
+        function showMessage(text, type) {
+            const messageEl = document.getElementById('message');
+            messageEl.textContent = text;
+            messageEl.className = `message ${type} fade-in`;
+            messageEl.style.display = 'block';
+
+            setTimeout(() => {
+                messageEl.style.display = 'none';
+            }, 4000);
+        }
+
+        function updateDisplay() {
+            document.getElementById('attemptsLeft').textContent = attemptsLeft;
+            document.getElementById('score').textContent = score;
+        }
+
+        // Manejar tecla Enter
+        document.getElementById('guessInput').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                submitGuess();
+            }
+        });
+
+        // Formatear entrada mientras escribe
+        document.getElementById('guessInput').addEventListener('input', function (e) {
+            let value = e.target.value.replace(/\D/g, '');
+            if (value.length > 5) value = value.substr(0, 5);
+            e.target.value = value;
+        });
+
+        // Inicializar
+        updateDisplay();
+        showMessage('¡Presiona "Nuevo Juego" para comenzar!', 'info');
+    </script>
+</body>
+
+</html>
